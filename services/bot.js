@@ -16,7 +16,7 @@ class Bot {
       "imagine-wizard",
       (ctx) => {
         ctx.reply(
-          "Please enter your prompts, the prompts can be\n✅ Text prompts\n✅ Image url + text prompts\n✅ Text prompts + parameters\n✅ Image url + text prompts + parameters\n\n Examples: \n✅https://cat.png Make this cat a space cat --ar 2:3\n✅A girl in white dress wearing a diamond necklace\n\nTo learn more about prompts please visit https://docs.midjourney.com/docs/prompts-2\n"
+          "Please enter your prompts, the prompts examples: \n✅https://cat.png Make this cat a space cat --ar 2:3\n✅A girl in white dress wearing a diamond necklace\n\nTo learn more about prompts please visit https://docs.midjourney.com/docs/prompts-2\n"
         )
         return ctx.wizard.next()
       },
@@ -30,7 +30,6 @@ class Bot {
         }
         try {
           const data = await process.mjservice.createImagine({ prompt })
-          console.log(data, prompt)
           if (data.success) {
             ctx.reply(`Generating your image...`)
             let tgMessageId, chatId, lastProgress
@@ -43,12 +42,12 @@ class Bot {
                 worker.terminate()
               } else if (progressResult) {
                 if (progressResult.messageId !== data.messageId) return
+
                 const progress = progressResult.progress
                 // handle the result like updating the message
                 if (!_.isNull(progress)) {
                   if (!tgMessageId) {
                     try {
-                      console.log(progressResult)
                       const message = await ctx.replyWithPhoto(progressResult.uri, {
                         caption: `${prompt} - (${progress}%)`,
                       })
@@ -75,27 +74,22 @@ class Bot {
                 if (progress === 100) {
                   // 图片生成完成
                   try {
+                    let inline_keyboard = []
+                    const keyboards = progressResult.buttons.map((button) => {
+                      return { text: button, callback_data: `/button ${data.messageId} ${button}` }
+                    })
+                    if (keyboards.length === 9) {
+                      inline_keyboard = [keyboards.slice(0, 4), keyboards.slice(4, 5), keyboards.slice(5, 9)]
+                    } else {
+                      inline_keyboard = _.chunk(keyboards, 2)
+                    }
                     await ctx.telegram.sendPhoto(
                       chatId,
                       { url: progressResult.uri },
                       {
                         caption: `'${prompt}' - (100%)`,
                         reply_markup: {
-                          inline_keyboard: [
-                            [
-                              { text: "U1", callback_data: `/button ${data.messageId} U1` },
-                              { text: "U2", callback_data: `/button ${data.messageId} U2` },
-                              { text: "U3", callback_data: `/button ${data.messageId} U3` },
-                              { text: "U4", callback_data: `/button ${data.messageId} U4` },
-                            ],
-                            [{ text: "🔄", callback_data: `/button ${data.messageId} 🔄` }],
-                            [
-                              { text: "V1", callback_data: `/button ${data.messageId} V1` },
-                              { text: "V2", callback_data: `/button ${data.messageId} V2` },
-                              { text: "V3", callback_data: `/button ${data.messageId} V3` },
-                              { text: "V4", callback_data: `/button ${data.messageId} V4` },
-                            ],
-                          ],
+                          inline_keyboard,
                         },
                       }
                     )

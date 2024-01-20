@@ -109,6 +109,30 @@ router.setCommand(
           replyText = "Zooming out 1.5x image"
           caption = "Zoom Out 1.5x"
           break
+        case "Upscale (2x)":
+          replyText = "Upscaling 2x image"
+          caption = "Upscale (2x)"
+          break
+        case "Upscale (4x)":
+          replyText = "Upscaling 4x image"
+          caption = "Upscale (4x)"
+          break
+        case "⬅️":
+          replyText = "Panning left"
+          caption = "Pan left"
+          break
+        case "⬆️":
+          replyText = "Panning up"
+          caption = "Pan up"
+          break
+        case "⬇️":
+          replyText = "Panning down"
+          caption = "Pan down"
+          break
+        case "➡️":
+          replyText = "Panning right"
+          caption = "Pan right"
+          break
       }
       ctx.reply(replyText)
       let tgMessageId, chatId, lastProgress
@@ -149,34 +173,15 @@ router.setCommand(
           }
 
           if (progress === 100) {
+            console.log(progressResult)
             let inline_keyboard = []
-            if (!["U1", "U2", "U3", "U4"].includes(button)) {
-              inline_keyboard = [
-                [
-                  { text: "U1", callback_data: `/button ${data.messageId} U1` },
-                  { text: "U2", callback_data: `/button ${data.messageId} U2` },
-                  { text: "U3", callback_data: `/button ${data.messageId} U3` },
-                  { text: "U4", callback_data: `/button ${data.messageId} U4` },
-                ],
-                [{ text: "🔄", callback_data: `/button ${data.messageId} 🔄` }],
-                [
-                  { text: "V1", callback_data: `/button ${data.messageId} V1` },
-                  { text: "V2", callback_data: `/button ${data.messageId} V2` },
-                  { text: "V3", callback_data: `/button ${data.messageId} V3` },
-                  { text: "V4", callback_data: `/button ${data.messageId} V4` },
-                ],
-              ]
+            const keyboards = progressResult.buttons.map((button) => {
+              return { text: button, callback_data: `/button ${data.messageId} ${button}` }
+            })
+            if (keyboards.length === 9) {
+              inline_keyboard = [keyboards.slice(0, 4), keyboards.slice(4, 5), keyboards.slice(5, 9)]
             } else {
-              inline_keyboard = [
-                [
-                  { text: "Vary (Subtle)", callback_data: `/button ${data.messageId} Vary (Subtle)` },
-                  { text: "Vary (Strong)", callback_data: `/button ${data.messageId} Vary (Strong)` },
-                ],
-                [
-                  { text: "Zoom Out 2x", callback_data: `/button ${data.messageId} Zoom Out 2x` },
-                  { text: "Zoom Out 1.5x", callback_data: `/button ${data.messageId} Zoom Out 1.5x` },
-                ],
-              ]
+              inline_keyboard = _.chunk(keyboards, 2)
             }
 
             // 图片生成完成
