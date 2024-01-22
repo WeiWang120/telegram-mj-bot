@@ -22,7 +22,7 @@ router.setCommand(
     fields: [],
   },
   async (ctx) => {
-    ctx.reply("Some help information")
+    ctx.reply("Please visit our official website to learn more https://www.midjourneybot.com")
   }
 )
 
