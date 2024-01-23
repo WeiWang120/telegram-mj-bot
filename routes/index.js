@@ -173,7 +173,6 @@ router.setCommand(
           }
 
           if (progress === 100) {
-            console.log(progressResult)
             let inline_keyboard = []
             const keyboards = progressResult.buttons.map((button) => {
               return { text: button, callback_data: `/button ${data.messageId} ${button}` }
