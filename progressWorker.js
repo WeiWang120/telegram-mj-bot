@@ -9,14 +9,14 @@ parentPort.on("message", async (data) => {
   let progressResult
 
   try {
-    while (progress < 100) {
+    while (!progress || progress < 100) {
       progressResult = await mjService.getProgress(data)
 
       if (progressResult.error) {
         parentPort.postMessage({ error: progressResult.error })
       }
 
-      await sleep(1000)
+      await sleep(5000)
       progress = progressResult.progress
 
       // Send progress update to main thread

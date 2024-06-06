@@ -147,12 +147,17 @@ router.setCommand(
           if (progressResult.messageId !== data.messageId) return
           const prompt = progressResult.prompt
           const progress = progressResult.progress
-          if (!_.isNull(progress)) {
+          console.log(progress, progressResult)
+          if (!_.isNull(progress) && !_.isUndefined(progress)) {
             if (!tgMessageId) {
               try {
-                const message = await ctx.replyWithPhoto(progressResult.uri, {
-                  caption: `${prompt} - (${progress}%)`,
-                })
+                const message = await ctx.telegram.sendPhoto(
+                  ctx.update.callback_query.message.chat.id,
+                  { url: progressResult.uri },
+                  {
+                    caption: `'${prompt}' - ${caption}`,
+                  }
+                )
                 tgMessageId = message.message_id
                 chatId = message.chat.id
               } catch (error) {

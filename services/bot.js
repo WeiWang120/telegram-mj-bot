@@ -43,16 +43,20 @@ class Bot {
               } else if (progressResult) {
                 if (progressResult.messageId !== data.messageId) return
 
+                console.log(progressResult)
                 const progress = progressResult.progress
                 // handle the result like updating the message
-                if (!_.isNull(progress)) {
+                if (!_.isNull(progress) && !_.isUndefined(progress)) {
                   if (!tgMessageId) {
                     try {
-                      const message = await ctx.replyWithPhoto(progressResult.uri, {
-                        caption: `${prompt} - (${progress}%)`,
-                      })
+                      chatId = ctx.message.chat.id
+                      const message = await ctx.sendPhoto(
+                        { url: progressResult.uri },
+                        {
+                          caption: `'${prompt} - ${progress}%`,
+                        }
+                      )
                       tgMessageId = message.message_id
-                      chatId = message.chat.id
                     } catch (error) {
                       ctx.reply(`Reply photo error: ${error}, please retry`)
                       console.error(error)
